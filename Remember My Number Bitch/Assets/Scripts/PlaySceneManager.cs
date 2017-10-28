@@ -28,10 +28,17 @@ public class PlaySceneManager : MonoBehaviour {
     void Start () {
         if (usingContacts) {
             phoneNumberArray = contactNumbersList[contactNumbersList.Count - 1];
+            Debug.Log(phoneNumberArray.Length);
         } else {
             CreatePhoneNumber();
         }
-        StartCoroutine(playEngineSound());
+        StartNewRound(isAudio);
+    }
+
+    private void StartNewRound (bool isAudio) {
+        if (isAudio) {
+            StartCoroutine(playEngineSound());
+        }
     }
 
     private void CreatePhoneNumber () {

@@ -8,16 +8,18 @@ using System.Text.RegularExpressions;
 
 public class MenuSceneManager : MonoBehaviour {
 
+    public Toggle contactsToggle;
+    public Text languageTitleText;
+
+
     public void OpenScene (Scene scene) {
         SceneManager.LoadScene((int)scene);
     }
 
     public void OpenPlaySceneWithCurrentMode () {
-        if (EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite.name == "contacts") {
+        if (PlaySceneManager.usingContacts) {
             GetContacts();
         } else {
-            PlaySceneManager.usingContacts = false;
-            PlaySceneManager.languageName = EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite.name;
             OpenScene(Scene.PlayScene);
         }
     }
@@ -28,6 +30,18 @@ public class MenuSceneManager : MonoBehaviour {
 
     private void onLoadFailed (string reason) {
 
+    }
+
+    public void LanguageSelected (string language = "") {
+        language = language == "" ? EventSystem.current.currentSelectedGameObject.GetComponent<Image>().sprite.name : language;
+        if (language != "eye") {
+            languageTitleText.text = language;
+        }
+        PlaySceneManager.languageName = language;
+    }
+
+    public void ToggleUsingContacts () {
+        PlaySceneManager.usingContacts = contactsToggle.isOn;
     }
 
     private void onDone () {
@@ -48,7 +62,6 @@ public class MenuSceneManager : MonoBehaviour {
             }
         }
         PlaySceneManager.languageName = "German";
-        PlaySceneManager.usingContacts = true;
         OpenScene(Scene.PlayScene);
     }
 
