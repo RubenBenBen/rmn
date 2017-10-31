@@ -17,10 +17,10 @@ public class MenuSceneManager : MonoBehaviour {
     }
 
     public void OpenPlaySceneWithCurrentMode () {
+        PlaySceneManager.usingContacts = contactsToggle.isOn;
         if (PlaySceneManager.usingContacts) {
             GetContacts();
         } else {
-            PlaySceneManager.usingContacts = contactsToggle.isOn;
             OpenScene(Scene.PlayScene);
         }
     }
@@ -46,23 +46,18 @@ public class MenuSceneManager : MonoBehaviour {
     private void onDone () {
         PlaySceneManager.contactNumbersList = new List<ContactUser>();
         if (Contacts.ContactsList.Count > 0) {
-            Debug.Log("CONTACT COUNT " + Contacts.ContactsList.Count);
             for (int i = 0 ; i < Contacts.ContactsList.Count ; i++) {
-                Debug.Log("WTF IS GOING ON");
                 Contact user = Contacts.ContactsList[i];
-                Debug.Log("PHONE COUNT " + user.Phones.Count);
                 for (int k = 0 ; k < user.Phones.Count ; k++) {
-                    Debug.Log("K IS WTF " + k);
                     PhoneContact phone = user.Phones[k];
                     string numbersOnly = Regex.Replace(phone.Number, "[^0-9]", "");
-                    Debug.Log("NUMBER IS " + numbersOnly);
                     ContactUser contactUser = new ContactUser(user.Name, StringToIntArray(numbersOnly));
                     PlaySceneManager.contactNumbersList.Add(contactUser);
                 }
             }
+            PlaySceneManager.usingContacts = contactsToggle.isOn;
+            OpenScene(Scene.PlayScene);
         }
-        PlaySceneManager.usingContacts = contactsToggle.isOn;
-        OpenScene(Scene.PlayScene);
     }
 
     #endregion

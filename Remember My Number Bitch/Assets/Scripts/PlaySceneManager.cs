@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class PlaySceneManager : MonoBehaviour {
 
@@ -33,11 +34,16 @@ public class PlaySceneManager : MonoBehaviour {
     private TouchScreenKeyboard keyboard;
     private bool endedTyping;
 
+    private float typeTime;
+    private int repeatCount;
+
+    private GameObject resultsPanel; //delete
+
     private void GetChildren () {
         playSceneHelper = transform.Find("ScriptContainer").Find("PlaySceneHelper").GetComponent<PlaySceneHelper>();
         audioModePanel = transform.Find("AudioModePanel").gameObject;
         eyeModePanel = transform.Find("EyeModePanel").gameObject;
-        inputPanel = transform.Find("InputPanel").gameObject;
+        resultsPanel = transform.Find("ResultsPanel").gameObject;
     }
 
     void Awake () {
@@ -62,6 +68,7 @@ public class PlaySceneManager : MonoBehaviour {
 
     private void StartNewRound () {
         currentNumberLength = phoneNumberArray.Length;
+        repeatCount = RepeatCountFromArray(phoneNumberArray);
         if (isAudio) {
             audioModePanel.SetActive(true);
             Invoke("StartAudio", 1);
@@ -74,18 +81,35 @@ public class PlaySceneManager : MonoBehaviour {
     }
 
     void Update () {
-        if (!endedTyping) {
-            if (keyboard != null && keyboard.done) {
+        if (!endedTyping && keyboard != null) {
+            if (keyboard.active) {
+                typeTime += Time.deltaTime;
+            } else if (keyboard.done) {
                 endedTyping = true;
                 if (keyboard.text == phoneNumberString) {
-                    levelsPassed++;
-                    SceneManager.LoadScene((int)Scene.PlayScene);
+                    ShowResults();
+                    Invoke("StartNextRound", 3);
                 } else {
-                    audioModePanel.SetActive(true);
+                    ShowResults();
                 }
                 keyboard = null;
             }
         }
+    }
+
+    private void StartNextRound () {
+        levelsPassed++;
+        SceneManager.LoadScene((int) Scene.PlayScene);
+    }
+
+    private void ShowResults () {
+        Text resultText = resultsPanel.transform.Find("Text").GetComponent<Text>();
+        string typeTimeString = "Typing Time: " + typeTime + "\n";
+        string repeatsCountString = "Repeats Count: " + repeatCount + "\n";
+        string numberLengthString = "Number Length: " + phoneNumberArray.Length + "\n";
+        string levelsPassedString = "Levels Passed: " + levelsPassed + "\n";
+        resultText.text = typeTimeString + repeatsCountString + numberLengthString + levelsPassedString;
+        resultsPanel.SetActive(true);
     }
 
     private void TimeEnded () {
@@ -133,7 +157,14 @@ public class PlaySceneManager : MonoBehaviour {
             phoneNumberArray[i] = Random.Range(0, 10);
             phoneNumberString += phoneNumberArray[i];
         }
-        Debug.Log(phoneNumberString);
+    }
+
+    private int RepeatCountFromList (List<int> list) {
+        return list.Count - list.Distinct().ToList().Count;
+    }
+
+    private int RepeatCountFromArray (int[] arr) {
+        return RepeatCountFromList(arr.ToList());
     }
 
     private string IntArrayToString (int[] arr) {
