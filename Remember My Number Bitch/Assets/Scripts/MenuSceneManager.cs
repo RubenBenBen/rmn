@@ -20,16 +20,9 @@ public class MenuSceneManager : MonoBehaviour {
         if (PlaySceneManager.usingContacts) {
             GetContacts();
         } else {
+            PlaySceneManager.usingContacts = contactsToggle.isOn;
             OpenScene(Scene.PlayScene);
         }
-    }
-
-    private void GetContacts () {
-        Contacts.LoadContactList(onDone, onLoadFailed);
-    }
-
-    private void onLoadFailed (string reason) {
-
     }
 
     public void LanguageSelected (string language = "") {
@@ -40,12 +33,18 @@ public class MenuSceneManager : MonoBehaviour {
         PlaySceneManager.languageName = language;
     }
 
-    public void ToggleUsingContacts () {
-        PlaySceneManager.usingContacts = contactsToggle.isOn;
+    #region Request Contacts
+
+    private void GetContacts () {
+        Contacts.LoadContactList(onDone, onLoadFailed);
+    }
+
+    private void onLoadFailed (string reason) {
+
     }
 
     private void onDone () {
-        PlaySceneManager.contactNumbersList = new List<int[]>();
+        PlaySceneManager.contactNumbersList = new List<ContactUser>();
         if (Contacts.ContactsList.Count > 0) {
             Debug.Log("CONTACT COUNT " + Contacts.ContactsList.Count);
             for (int i = 0 ; i < Contacts.ContactsList.Count ; i++) {
@@ -57,13 +56,18 @@ public class MenuSceneManager : MonoBehaviour {
                     PhoneContact phone = user.Phones[k];
                     string numbersOnly = Regex.Replace(phone.Number, "[^0-9]", "");
                     Debug.Log("NUMBER IS " + numbersOnly);
-                    PlaySceneManager.contactNumbersList.Add(StringToIntArray(numbersOnly));
+                    ContactUser contactUser = new ContactUser(user.Name, StringToIntArray(numbersOnly));
+                    PlaySceneManager.contactNumbersList.Add(contactUser);
                 }
             }
         }
-        PlaySceneManager.languageName = "German";
+        PlaySceneManager.usingContacts = contactsToggle.isOn;
         OpenScene(Scene.PlayScene);
     }
+
+    #endregion
+
+    #region Helper Functions
 
     private int[] StringToIntArray (string numString) {
         int[] intArr = new int[numString.Length];
@@ -87,4 +91,6 @@ public class MenuSceneManager : MonoBehaviour {
 
         return array;
     }
+
+    #endregion
 }
