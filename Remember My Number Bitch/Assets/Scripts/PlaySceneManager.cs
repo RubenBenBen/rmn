@@ -54,6 +54,8 @@ public class PlaySceneManager : MonoBehaviour {
         } else {
             isAudio = true;
             audioModePanel.transform.Find("LanguageNamePanel").Find("Text").GetComponent<Text>().text = languageName;
+            audioModePanel.transform.Find("LipsImage").Find("Image").GetComponent<Image>().sprite =
+                Resources.Load<Sprite>("Flags/" + languageName);
             SetAudios();
         }
 
